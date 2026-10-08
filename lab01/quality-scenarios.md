@@ -6,7 +6,7 @@
 - Branch manager (PNH, REP, BTB): logs in on day 2 and looks only at their own branch's page; must never see another branch's figures.
 - Finance director: wants to be told the moment the report is ready, and signs off on the totals.
 - Operations person who runs the job: schedules the batch at 06:00 on day 2, watches the progress, re-runs it when a branch file is late or a link is down.
-- Our team (developers): has to build, test and change this system all semester with a small pair/team and a fixed lab schedule.
+- Our team (developers): has to build, test and change this system all semester with a small team and a fixed lab schedule.
 
 ## Scenarios
 
@@ -38,7 +38,7 @@
 - A6: PDF and XLSX renderers arrive in Lab-08; QA-4 is measured on a renderer added to the same sealed hierarchy.
 - A7: branch managers have exactly one account, scoped to one branch code; QA-5 is measured against scripted HTTP requests, not a penetration test.
 - A8: timings use wall-clock seconds on one machine, median of 5 runs after 2 warm-up runs, same heap and no other load.
-- A9: "lines changed" and "person-days" are counted from git history and the pair's own time sheet.
+- A9: "lines changed" and "person-days" are counted from git history and our own time sheet.
 
 ## Utility tree
 
