@@ -1,0 +1,32 @@
+flowchart LR
+  pos["Branch POS systems<br/>[External system, x3]<br/>export one CSV file per branch per day"]:::external
+  ops["Operations person<br/>[Person]<br/>runs and monitors the 06:00 job"]:::person
+
+  subgraph boundary["Monthly Sales Report System"]
+    direction TB
+    landing[("Landing zone<br/>[file system]<br/>data/yyyy-MM/BRANCH-date.csv")]:::container
+    ingest["Ingest job<br/>[Java 25 CLI, scheduled 06:00]<br/>validates and parses every row"]:::container
+    batch["Report batch<br/>[Java 25, in-process JVM]<br/>aggregates totals and renders the output"]:::container
+    store[("Report store<br/>[file system]<br/>rendered monthly reports")]:::container
+    fx["JavaFX desktop viewer<br/>[JavaFX, Chapters 02-03]<br/>analyst opens and exports reports"]:::container
+    web["Web report page<br/>[Java HTTP server + HTML, Chapter 08]<br/>manager reads own branch over HTTPS"]:::container
+  end
+
+  analyst["Head-office analyst<br/>[Person]<br/>views and exports all reports"]:::person
+  manager["Branch manager<br/>[Person]<br/>PNH, REP, BTB: own branch only"]:::person
+  mail["E-mail service<br/>[External system]<br/>delivers report-ready notifications"]:::external
+
+  pos -- "pushes daily CSV files [SFTP]" --> landing
+  ops -- "starts and monitors the job [CLI]" --> ingest
+  landing -- "reads files in name order [file system]" --> ingest
+  ingest -- "validated sales rows and progress events [in-process call]" --> batch
+  batch -- "writes txt, html and csv reports [file system]" --> store
+  store -- "loads a rendered report [file system]" --> fx
+  store -- "loads a rendered report [file system]" --> web
+  analyst -- "opens and exports reports [JavaFX UI]" --> fx
+  manager -- "views own branch report [HTTPS]" --> web
+  batch -- "announces the finished report [SMTP]" --> mail
+
+  classDef person fill:#08427b,color:#ffffff,stroke:#052e56
+  classDef external fill:#8a8a8a,color:#ffffff,stroke:#6b6b6b
+  classDef container fill:#1168bd,color:#ffffff,stroke:#0b4884
