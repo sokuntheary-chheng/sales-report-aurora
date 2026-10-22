@@ -453,6 +453,7 @@ public final class SalesDataGenerator {
                         + targets.get(category));
             }
         }
+        check(lines);
     }
 
     /** Adds the missing revenue with whole extra units, then one discount. */
@@ -483,28 +484,56 @@ public final class SalesDataGenerator {
         }
     }
 
-    /** Takes the surplus away with whole units, then with one discount. */
+    /** Takes the surplus away with the discount first, then with whole units. */
     private static void decrease(List<Line> lines, BigDecimal delta) {
         int index = 0;
         while (delta.signum() > 0 && index < lines.size() * 100) {
             Line line = lines.get(index % lines.size());
             BigDecimal price = line.product.price();
-            if (line.quantity > 1 && delta.compareTo(price) >= 0) {
-                line.quantity--;
-                delta = delta.subtract(price);
-                index++;
-                continue;
-            }
-            BigDecimal room = price.multiply(BigDecimal.valueOf(line.quantity))
-                    .subtract(line.discount);
-            if (room.compareTo(delta) >= 0) {
+            BigDecimal total = price.multiply(BigDecimal.valueOf(line.quantity));
+            BigDecimal room = total.subtract(line.discount);
+            if (room.signum() > 0 && delta.compareTo(room) >= 0) {
+                // the whole room: the line is given away for nothing
+                line.discount = total;
+                delta = delta.subtract(room);
+            } else if (room.signum() > 0) {
                 line.discount = line.discount.add(delta);
                 delta = BigDecimal.ZERO;
+            } else if (line.quantity > 1) {
+                // no room left: one unit less. The discount must still fit the
+                // shorter line.
+                BigDecimal shorter = price.multiply(
+                        BigDecimal.valueOf(line.quantity - 1));
+                BigDecimal capped = line.discount.min(shorter);
+                BigDecimal drop = price.subtract(line.discount).add(capped);
+                line.discount = capped;
+                line.quantity--;
+                delta = delta.subtract(drop);
             }
             index++;
         }
         if (delta.signum() > 0) {
             throw new IllegalStateException("cannot take " + delta + " away");
+        }
+    }
+
+    /** Checks that every line is a line the parser would accept. */
+    private static void check(List<Line> lines) {
+        for (Line line : lines) {
+            BigDecimal total = line.product.price()
+                    .multiply(BigDecimal.valueOf(line.quantity));
+            if (line.quantity < 1) {
+                throw new IllegalStateException(
+                        "quantity must be positive: " + line.quantity);
+            }
+            if (line.discount.signum() < 0) {
+                throw new IllegalStateException(
+                        "negative discount: " + line.discount);
+            }
+            if (line.discount.compareTo(total) > 0) {
+                throw new IllegalStateException("discount " + line.discount
+                        + " exceeds the line total " + total);
+            }
         }
     }
 
