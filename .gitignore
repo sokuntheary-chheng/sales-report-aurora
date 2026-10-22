@@ -1,4 +1,17 @@
+# build output
 target/
+
+# reproducible sample data (regenerate with the SalesDataGenerator)
 data/
 
+# the lab brief itself is not part of the deliverable
 secret.md
+
+# editors
+.vscode/
+.idea/
+*.iml
+*.log
+
+# task list of the local tooling
+Todo.json

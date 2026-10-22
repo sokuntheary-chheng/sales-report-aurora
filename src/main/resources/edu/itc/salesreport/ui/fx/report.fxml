@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- The same screen as ReportView, but the layout lives in this file.
+     The controller class ReportFxmlView only wires the widgets. -->
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.itc.salesreport.ui.fx.ReportFxmlView">
+
+    <top>
+        <HBox spacing="8" alignment="CENTER_LEFT" BorderPane.alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="8" right="8" bottom="8" left="8"/>
+            </padding>
+            <Label text="Month"/>
+            <TextField fx:id="monthField" prefWidth="90" text="2026-09"/>
+            <Label text="Branch"/>
+            <ComboBox fx:id="branchBox" prefWidth="120"/>
+        </HBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.6" BorderPane.alignment="CENTER">
+            <TableView fx:id="table" prefWidth="600"/>
+            <BarChart fx:id="chart" title="Revenue by category (USD)"
+                      legendVisible="false" animated="false" BorderPane.alignment="CENTER">
+                <xAxis>
+                    <CategoryAxis/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis/>
+                </yAxis>
+            </BarChart>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <VBox spacing="4" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="8" right="8" bottom="8" left="8"/>
+            </padding>
+            <Label fx:id="status" text="No month loaded"/>
+            <Label fx:id="error" style="-fx-text-fill: firebrick;" wrapText="true"/>
+        </VBox>
+    </bottom>
+
+</BorderPane>

@@ -46,7 +46,7 @@ public final class CsvTransactionParser implements TransactionParser {
 
         if (quantity <= 0) {
             throw new InvalidRowException(
-                    "bad quantity '" + f[6].strip() + "': must be greater than 0");
+                    "quantity must be positive: " + f[6].strip());
         }
         if (unitPrice.signum() < 0) {
             throw new InvalidRowException(
