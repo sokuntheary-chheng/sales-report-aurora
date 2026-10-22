@@ -3,21 +3,21 @@ package edu.itc.salesreport.ui.fx;
 import edu.itc.salesreport.engine.DefaultSalesAggregator;
 import edu.itc.salesreport.ingest.CsvMonthReader;
 import edu.itc.salesreport.ingest.CsvTransactionParser;
+import edu.itc.salesreport.ui.ReportController;
 import edu.itc.salesreport.ui.SalesModel;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.time.YearMonth;
+import java.time.Clock;
 
 /**
  * The desktop viewer of the Angkor Mart monthly sales report.
  *
- * <p>The application is the composition root: it builds the model, gives it
- * to the view and shows the window. Task 3 hands the gestures to a
- * controller.
+ * <p>The application is the composition root: it builds the model, the view
+ * and the controller, hands the gestures to the controller and shows the
+ * window.
  */
 public final class ReportApp extends Application {
 
@@ -28,15 +28,20 @@ public final class ReportApp extends Application {
         var model = new SalesModel(new CsvMonthReader(new CsvTransactionParser()),
                 new DefaultSalesAggregator());
         var view = new ReportView(model);
+        var controller = new ReportController(model, DATA_DIR,
+                Clock.systemDefaultZone(), view);
+        view.bind(controller);
 
         stage.setTitle("Angkor Mart · Monthly sales (MVC)");
         stage.setScene(new Scene(view.root(), 1100, 700));
         stage.show();
 
-        try {
-            model.load(DATA_DIR, YearMonth.of(2026, 9));
-        } catch (IOException e) {
-            view.showError("Could not read the sales files: " + e.getMessage());
+        // the month and the branch may be given on the command line, so that
+        // the viewer can open on a given report
+        var arguments = getParameters().getUnnamed();
+        controller.monthEntered(arguments.isEmpty() ? "2026-09" : arguments.getFirst());
+        if (arguments.size() > 1) {
+            controller.branchChosen(arguments.get(1));
         }
     }
 
