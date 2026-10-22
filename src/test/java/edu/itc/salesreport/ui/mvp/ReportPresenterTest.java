@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -82,6 +81,15 @@ class ReportPresenterTest {
                 "Power Bank 10000mAh", "Electronics", "1", "18.00", "0.90"),
                 screen.rows.get(1));
         assertEquals("", screen.error);
+    }
+
+    @Test
+    void theRevenueOfEveryCategoryIsPushedToTheScreen() {
+        presenter.monthEntered("2026-09");
+        presenter.branchChosen("PNH");
+
+        assertEquals(Map.of("Grocery", new BigDecimal("13.00"),
+                "Electronics", new BigDecimal("18.00")), screen.categories);
     }
 
     @Test

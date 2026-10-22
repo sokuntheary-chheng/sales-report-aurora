@@ -22,7 +22,7 @@ public final class ReportText {
             case SalesEvent.MonthLoaded(var month, var rows, var rejected) ->
                     "%s: %d rows, %d rejected".formatted(month, rows, rejected);
             case SalesEvent.BranchSelected(var branch) ->
-                    "%s: %s".formatted(summary.branch(),
+                    "%s: %s".formatted(branch,
                             model.month().map(Object::toString).orElse("no month"));
         };
         text += " · revenue USD %s · receipts %d"

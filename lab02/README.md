@@ -12,7 +12,7 @@ whole chain, the revenue by category and the rows that were refused.
 | Tag | `lab-02` |
 | Pull request | `Lab-02 – Aurora` |
 | Java / Maven / JavaFX / JUnit | JDK 25 · Maven 3.9 · JavaFX 25.0.4 · JUnit 6.1 |
-| Tests | 47, none of them starts JavaFX (about one second) |
+| Tests | 48, none of them starts JavaFX (about one second) |
 
 ## The files of this lab
 
@@ -174,12 +174,17 @@ and every bad parameter becomes a message instead of an error page:
   summary no longer copies the maps with `Map.copyOf`, which would lose the
   order.
 * **More tests than the brief counts.** The brief counts 26 tests for
-  Tasks 1-4 and 28 with Task 5; the repository holds 47, because the tests
+  Tasks 1-4 and 28 with Task 5; the repository holds 48, because the tests
   of Lab-01 are still there and because `CsvTransactionParserTest` keeps
   the ten refused rows of Lab-01 instead of the seven of the brief.
 * **`RowItem` has one component more.** The brief lists six components; the
   "Discount" column of Task 5 adds a seventh one. The comparison in
   `lab02/mvc-vs-mvp.md` shows what that costs in both variants.
+* **The code compiles without a warning.** `javac -Xlint:all -Werror` over
+  `src/main/java` and `src/test/java` reports nothing, and the suite of the
+  lab runs without a display. `.vscode/settings.json` tells the Java
+  language server to update the Maven project by itself, so that the editor
+  always knows the JavaFX dependencies of the `pom.xml`.
 
 ## Change log
 
