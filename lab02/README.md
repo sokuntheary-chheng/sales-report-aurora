@@ -80,6 +80,14 @@ whole chain, the revenue by category and the rows that were refused.
 | Domain types and the parser | `src/main/java/.../model`, `.../ingest` | `SaleTransaction`, `PaymentMethod`, `ProductTotal`, `BranchSummary`, `TransactionParser`, `InvalidRowException`, `CsvTransactionParser` | `069d7ac` |
 | Team repository | GitHub `sokuntheary-chheng/sales-report-aurora` | one branch per lab, one tag per lab | — |
 
+## The screenshots
+
+| File | What it shows |
+|---|---|
+| `lab02/screenshots/mvc-viewer.png` | the MVC viewer with 3,600 rows, six bars and the status line `2026-09: 3600 rows, 0 rejected · revenue USD 26721.90 · receipts 1493` |
+| `lab02/screenshots/validation.png` | the same viewer with the broken row of the brief appended: the status line reports `1 rejected` while the revenue stays `26721.90`, the refused row is named (`PNH-2026-09-15.csv:42 quantity must be positive: -1`) and the red label shows the refused input (`'2026/09' is not a month in the form yyyy-MM`) |
+| `lab02/screenshots/mvp-viewer.png` | the MVP variant of the same screen: the same rows and the same bars, the status line of the presenter (`ALL · 1493 receipts · revenue USD 26,721.90 · basket USD 17.90`) |
+
 ## How to build and run
 
 ```bash
