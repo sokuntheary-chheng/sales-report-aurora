@@ -459,6 +459,7 @@ public final class SalesDataGenerator {
     /** Adds the missing revenue with whole extra units, then one discount. */
     private static void increase(List<Line> lines, BigDecimal delta) {
         int index = 0;
+        // whole units first, spread over the lines of the category
         while (delta.signum() > 0 && index < lines.size() * 100) {
             Line line = lines.get(index % lines.size());
             BigDecimal price = line.product.price();
@@ -469,39 +470,28 @@ public final class SalesDataGenerator {
             index++;
         }
         if (delta.signum() > 0) {
-            Line line = lines.get(index % lines.size());
-            BigDecimal price = line.product.price();
-            if (delta.compareTo(line.discount) <= 0) {
-                line.discount = line.discount.subtract(delta);
-            } else {
-                int units = delta.subtract(line.discount)
-                        .divide(price, 0, RoundingMode.CEILING).intValue();
-                line.quantity += units;
-                line.discount = line.discount
-                        .add(price.multiply(BigDecimal.valueOf(units)))
-                        .subtract(delta);
+            // what is left is less than one unit: it goes on the cheapest
+            // line, so that the discount stays small
+            Line cheapest = cheapest(lines);
+            BigDecimal price = cheapest.product.price();
+            while (delta.compareTo(price) > 0) {
+                cheapest.quantity++;
+                delta = delta.subtract(price);
             }
+            cheapest.quantity++;
+            cheapest.discount = cheapest.discount.add(price).subtract(delta);
         }
     }
 
-    /** Takes the surplus away with the discount first, then with whole units. */
+    /** Takes the surplus away with whole units, then with one discount. */
     private static void decrease(List<Line> lines, BigDecimal delta) {
         int index = 0;
+        // whole units first, spread over the lines of the category
         while (delta.signum() > 0 && index < lines.size() * 100) {
             Line line = lines.get(index % lines.size());
             BigDecimal price = line.product.price();
-            BigDecimal total = price.multiply(BigDecimal.valueOf(line.quantity));
-            BigDecimal room = total.subtract(line.discount);
-            if (room.signum() > 0 && delta.compareTo(room) >= 0) {
-                // the whole room: the line is given away for nothing
-                line.discount = total;
-                delta = delta.subtract(room);
-            } else if (room.signum() > 0) {
-                line.discount = line.discount.add(delta);
-                delta = BigDecimal.ZERO;
-            } else if (line.quantity > 1) {
-                // no room left: one unit less. The discount must still fit the
-                // shorter line.
+            if (line.quantity > 1 && delta.compareTo(price) >= 0) {
+                // the discount must still fit the shorter line
                 BigDecimal shorter = price.multiply(
                         BigDecimal.valueOf(line.quantity - 1));
                 BigDecimal capped = line.discount.min(shorter);
@@ -513,8 +503,59 @@ public final class SalesDataGenerator {
             index++;
         }
         if (delta.signum() > 0) {
+            // what is left is less than one unit: it goes into the discount of
+            // the line that needs the smallest one
+            Line line = tightest(lines, delta);
+            line.discount = line.discount.add(delta);
+            delta = BigDecimal.ZERO;
+        }
+        if (delta.signum() > 0) {
             throw new IllegalStateException("cannot take " + delta + " away");
         }
+    }
+
+    /** The line with the smallest unit price. */
+    private static Line cheapest(List<Line> lines) {
+        Line cheapest = lines.getFirst();
+        for (Line line : lines) {
+            if (line.product.price().compareTo(cheapest.product.price()) < 0) {
+                cheapest = line;
+            }
+        }
+        return cheapest;
+    }
+
+    /** The line whose discount has to grow the least to hold the amount. */
+    private static Line tightest(List<Line> lines, BigDecimal amount) {
+        Line best = null;
+        BigDecimal bestRoom = null;
+        for (Line line : lines) {
+            BigDecimal room = line.product.price()
+                    .multiply(BigDecimal.valueOf(line.quantity))
+                    .subtract(line.discount);
+            // a line that still has a value afterwards is preferred
+            if (room.compareTo(amount) > 0
+                    && (bestRoom == null || room.compareTo(bestRoom) < 0)) {
+                best = line;
+                bestRoom = room;
+            }
+        }
+        if (best == null) {
+            for (Line line : lines) {
+                BigDecimal room = line.product.price()
+                        .multiply(BigDecimal.valueOf(line.quantity))
+                        .subtract(line.discount);
+                if (room.compareTo(amount) >= 0
+                        && (bestRoom == null || room.compareTo(bestRoom) < 0)) {
+                    best = line;
+                    bestRoom = room;
+                }
+            }
+        }
+        if (best == null) {
+            throw new IllegalStateException("no line can hold " + amount);
+        }
+        return best;
     }
 
     /** Checks that every line is a line the parser would accept. */
