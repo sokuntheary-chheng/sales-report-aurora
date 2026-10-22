@@ -63,6 +63,12 @@ whole chain, the revenue by category and the rows that were refused.
 | `lab02/adr-002-presentation-pattern.md` | 5 | sokuntheary-chheng |
 | `lab02/screenshots/mvp-viewer.png` | 5 | sokuntheary-chheng |
 | `lab02/README.md` | 5 | sokuntheary-chheng |
+| `sales-web/pom.xml` | challenge | sokuntheary-chheng |
+| `sales-web/src/main/java/edu/itc/salesreport/web/SalesWebApp.java` | challenge | sokuntheary-chheng |
+| `sales-web/src/main/java/edu/itc/salesreport/web/SalesReportConfiguration.java` | challenge | sokuntheary-chheng |
+| `sales-web/src/main/java/edu/itc/salesreport/web/ReportWebController.java` | challenge | sokuntheary-chheng |
+| `sales-web/src/main/resources/templates/report.html` | challenge | sokuntheary-chheng |
+| `sales-web/src/test/java/edu/itc/salesreport/web/ReportWebControllerTest.java` | challenge | sokuntheary-chheng |
 
 ## The inputs of Lab-01 that we reused
 
@@ -116,6 +122,34 @@ the viewer reports
 rejected row: PNH-2026-09-15.csv:42 quantity must be positive: -1
 ```
 
+## The challenge: the same model on a web page
+
+`sales-web/` is a second Maven project that depends on `edu.itc:sales-report`
+and changes nothing in `model`, `ingest`, `engine` or `ui`.
+
+```bash
+mvn -q install                       # publish edu.itc:sales-report:0.2.0-SNAPSHOT
+cd sales-web && mvn -q verify         # the @WebMvcTest of the page
+mvn dependency:tree -Dincludes=org.openjfx   # prints no JavaFX artifact
+java -jar target/sales-web-0.2.0-SNAPSHOT.jar --salesreport.data-dir=../data
+```
+
+The page shows the same figures as the desktop viewer:
+
+```
+$ curl -s "localhost:8080/report?month=2026-09&branch=PNH"
+<h1>Angkor Mart · 2026-09 · PNH</h1>
+<p class="totals">Revenue USD 8455.90 · receipts 489 · basket USD 17.29 · rejected rows 0</p>
+```
+
+and every bad parameter becomes a message instead of an error page:
+
+| Request | Answer |
+|---|---|
+| `?month=09/2026` | HTTP 200, `'09/2026' is not a month in the form yyyy-MM` |
+| `?month=2026-09&branch=XYZ` | HTTP 200, `Unknown branch 'XYZ': use ALL, PNH, REP or BTB` |
+| `?month=2026-07` | HTTP 200, `No sales data found in ..\data\2026-07` |
+
 ## Notes and deviations
 
 * **The work was done alone.** The brief asks for pairs and for the commits
@@ -152,3 +186,4 @@ rejected row: PNH-2026-09-15.csv:42 quantity must be positive: -1
 | Date | Lab | Change | Commit or tag |
 |---|---|---|---|
 | 2026-10-22 | Lab-02 | Observable model, JavaFX view, controller with validation, headless tests, the refactoring of the fat controller, the MVP variant and the comparison | `lab-02` |
+| 2026-10-22 | Lab-02 (challenge) | The Spring MVC page of the same model, with its own `@WebMvcTest` | `lab-02` |
