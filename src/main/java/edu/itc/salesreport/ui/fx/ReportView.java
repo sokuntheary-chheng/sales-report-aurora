@@ -3,6 +3,7 @@ package edu.itc.salesreport.ui.fx;
 import edu.itc.salesreport.model.SaleTransaction;
 import edu.itc.salesreport.ui.ErrorDisplay;
 import edu.itc.salesreport.ui.ReportController;
+import edu.itc.salesreport.ui.ReportText;
 import edu.itc.salesreport.ui.SalesEvent;
 import edu.itc.salesreport.ui.SalesModel;
 import edu.itc.salesreport.ui.SalesModelListener;
@@ -56,7 +57,8 @@ public final class ReportView implements SalesModelListener, ErrorDisplay {
                 column("Product", SaleTransaction::productName),
                 column("Category", SaleTransaction::category),
                 column("Qty", t -> String.valueOf(t.quantity())),
-                column("Revenue", t -> t.revenue().toPlainString())));
+                column("Revenue", t -> t.revenue().toPlainString()),
+                column("Discount", t -> t.discount().toPlainString())));
         chart.setTitle("Revenue by category (USD)");
         chart.setLegendVisible(false);
         chart.setAnimated(false);
@@ -129,21 +131,7 @@ public final class ReportView implements SalesModelListener, ErrorDisplay {
 
     /** The line below the screen: the figures of the model and the rejects. */
     private String statusText(SalesEvent event) {
-        var summary = model.summary();
-        var text = switch (event) {
-            case SalesEvent.MonthLoaded(var month, var rows, var rejected) ->
-                    "%s: %d rows, %d rejected".formatted(month, rows, rejected);
-            case SalesEvent.BranchSelected(var branch) ->
-                    "%s: %s".formatted(summary.branch(), model.month()
-                            .map(month -> month.toString()).orElse("no month"));
-        };
-        text += " · revenue USD %s · receipts %d"
-                .formatted(summary.revenue(), summary.receipts());
-        var rejected = model.rejectedRows();
-        if (!rejected.isEmpty()) {
-            text += System.lineSeparator() + "rejected row: " + rejected.getFirst();
-        }
-        return text;
+        return ReportText.status(model, event);
     }
 
     // records have no JavaFX properties: adapt each column with a lambda
