@@ -3,6 +3,9 @@ package edu.itc.salesreport.ingest;
 /** A row that could not be parsed; the message names the offending field. */
 public class InvalidRowException extends Exception {
 
+    /** The version of the shape of this exception. */
+    private static final long serialVersionUID = 1L;
+
     public InvalidRowException(String message) {
         super(message);
     }

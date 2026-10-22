@@ -81,7 +81,7 @@ public final class ReportView implements SalesModelListener, ErrorDisplay {
         root.setCenter(centre);
         root.setBottom(bottom);
         VBox.setVgrow(status, Priority.NEVER);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_LAST_COLUMN);
 
         model.addListener(this);
     }
@@ -106,7 +106,7 @@ public final class ReportView implements SalesModelListener, ErrorDisplay {
     public void modelChanged(SalesEvent event) {
         branchBox.setValue(model.branch());
         table.getItems().setAll(model.visibleTransactions());
-        chart.getData().setAll(series());
+        chart.getData().setAll(List.of(series()));
         status.setText(statusText(event));
     }
 
@@ -128,7 +128,6 @@ public final class ReportView implements SalesModelListener, ErrorDisplay {
                         .add(new XYChart.Data<>(category, revenue)));
         return series;
     }
-
     /** The line below the screen: the figures of the model and the rejects. */
     private String statusText(SalesEvent event) {
         return ReportText.status(model, event);

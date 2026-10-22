@@ -11,7 +11,8 @@ public final class ConsoleProgress implements LoadListener {
                 System.out.printf("[%d/%d] %s accepted %d rejected %d%n",
                         done, total, file.getFileName(), ok, bad);
             case LoadEvent.LoadFinished(var ok, var bad, var took) ->
-                System.out.printf("Loaded %d rows, rejected %d%n", ok, bad);
+                System.out.printf("Loaded %d rows, rejected %d in %d ms%n",
+                        ok, bad, took.toMillis());
         }
     }
 

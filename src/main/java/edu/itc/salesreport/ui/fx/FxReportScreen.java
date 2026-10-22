@@ -75,7 +75,7 @@ public final class FxReportScreen implements ReportScreen {
         root.setTop(filters);
         root.setCenter(centre);
         root.setBottom(bottom);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_LAST_COLUMN);
     }
 
     /** The node that holds the whole screen. */
@@ -99,7 +99,7 @@ public final class FxReportScreen implements ReportScreen {
         var series = new XYChart.Series<String, Number>();
         revenue.forEach((category, amount) ->
                 series.getData().add(new XYChart.Data<>(category, amount)));
-        chart.getData().setAll(series);
+        chart.getData().setAll(List.of(series));
     }
 
     @Override

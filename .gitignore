@@ -8,7 +8,6 @@ data/
 secret.md
 
 # editors
-.vscode/
 .idea/
 *.iml
 *.log

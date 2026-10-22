@@ -67,7 +67,7 @@ public final class ReportFxmlView implements SalesModelListener, ErrorDisplay {
                 column("Qty", t -> String.valueOf(t.quantity())),
                 column("Revenue", t -> t.revenue().toPlainString()),
                 column("Discount", t -> t.discount().toPlainString())));
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_LAST_COLUMN);
     }
 
     /**
@@ -110,7 +110,7 @@ public final class ReportFxmlView implements SalesModelListener, ErrorDisplay {
         model.summary().revenueByCategory().forEach(
                 (category, revenue) -> series.getData()
                         .add(new XYChart.Data<>(category, revenue)));
-        chart.getData().setAll(series);
+        chart.getData().setAll(List.of(series));
         status.setText(ReportText.status(model, event));
     }
 
