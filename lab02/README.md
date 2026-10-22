@@ -6,6 +6,14 @@ The lab builds the first running piece of the Angkor Mart monthly sales
 system: a JavaFX viewer that shows the transactions of a branch or of the
 whole chain, the revenue by category and the rows that were refused.
 
+> **This lab was worked on alone.** The brief asks for pairs ("work in
+> pairs", "each partner commits at least one of the classes", "meaningful
+> commits from both partners"). The team Aurora has one member, so every
+> commit carries one name. The lab was still worked through task by task,
+> with one commit per task, so the history shows the same steps a pair would
+> show. Lab-01 of this team was accepted on the same terms (see the commit
+> `5bf2fb8 lab01: solo wording - remove pair references`).
+
 | | |
 |---|---|
 | Branch | `lab-02` |
