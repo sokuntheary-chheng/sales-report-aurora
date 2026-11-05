@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,7 +176,7 @@ public final class ReportViewModel {
                 new BackgroundJobs.JobListener<>() {
                     @Override
                     public void progress(double fraction) {
-                        // TODO Task 4: progress.set(fraction)
+                        progress.set(fraction);
                     }
 
                     @Override
@@ -198,7 +199,7 @@ public final class ReportViewModel {
 
                     @Override
                     public void cancelled() {
-                        // TODO Task 4: status "Cancelled, previous data kept."
+                        status.set("Cancelled, previous data kept.");
                         loading.set(false);
                     }
                 });
@@ -210,6 +211,9 @@ public final class ReportViewModel {
             throws Exception {
         var loaded = new ArrayList<BranchSummary>(branches.size());
         for (int i = 0; i < branches.size(); i++) {
+            if (sink.isCancelled()) {
+                throw new CancellationException();
+            }
             loaded.add(source.load(chosen, branches.get(i)));
             sink.update(i + 1, branches.size());
         }
@@ -247,7 +251,10 @@ public final class ReportViewModel {
     }
 
     private void cancel() {
-        // TODO Task 4: cancel the running job, if any
+        if (running != null) {
+            running.cancel();
+            running = null;
+        }
     }
 
     // ---- accessors: read-only types for everything the view must not set
