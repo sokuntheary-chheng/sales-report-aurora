@@ -16,7 +16,7 @@ Pull request: **to be added after the PR is opened** (title
 | `lab03/measurements.md` | Task 4: hardware, data, method, all 10 benchmark runs, manual observation | Chheng Sokuntheary |
 | `lab03/mvc-vs-mvvm.md` | Task 5: the two versions compared with own numbers | Chheng Sokuntheary |
 | `lab03/README.md` | this file: files, reused inputs, change log, deviations | Chheng Sokuntheary |
-| `lab03/screenshots/viewer.png` | Task 2: the running viewer on 2026-08 | Chheng Sokuntheary (pending) |
+| `lab03/screenshots/viewer.png` | Task 2: the running viewer on 2026-08 | Chheng Sokuntheary |
 | `src/main/java/…/ui/ReportViewModel.java` | the ViewModel: observable state, validation, load orchestration | Chheng Sokuntheary |
 | `src/main/java/…/ui/ReportView.java` | the JavaFX view: controls and bindings, no logic | Chheng Sokuntheary |
 | `src/main/java/…/ui/ReportViewerApp.java` | the composition root of the viewer (`SummarySource` adapter) | Chheng Sokuntheary |
@@ -89,6 +89,5 @@ Pull request: **to be added after the PR is opened** (title
    141 ms against the 100 ms goal — recorded as measured in
    `lab03/measurements.md`, without re-running.
 9. **Not attempted:** the ★ Challenge (second view on the same ViewModel).
-10. **Pending by the author:** `lab03/screenshots/viewer.png` (capture
-    instructions in `lab03/measurements.md` / the brief) and the 3–5
-    sentences of manual observation in `lab03/measurements.md`.
+10. **Pending by the author:** the 3–5 sentences of manual observation in
+    `lab03/measurements.md` (its benchmark section is already complete).
