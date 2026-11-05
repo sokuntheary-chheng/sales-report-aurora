@@ -14,6 +14,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -72,10 +75,11 @@ public final class ReportViewModel {
     private final ReadOnlyStringWrapper loadError =
             new ReadOnlyStringWrapper(this, "loadError", "");
 
-    // ---- computed state (Task 3 replaces the placeholders)
+    // ---- computed state
     private final StringBinding monthError;
     private final StringBinding branchError;
     private final StringBinding validationMessage;
+    private final BooleanBinding valid;
     private final BooleanBinding canGenerate;
     private final ObjectBinding<BigDecimal> totalRevenue;
     private final StringBinding totalRevenueText;
@@ -106,11 +110,21 @@ public final class ReportViewModel {
         for (String b : BRANCHES) {
             branchSelected.put(b, new SimpleBooleanProperty(this, b, true));
         }
-        // TODO Task 3: real rules (future month, empty branch selection)
-        monthError = Bindings.createStringBinding(() -> "", month);
-        branchError = Bindings.createStringBinding(() -> "");
-        validationMessage = Bindings.createStringBinding(() -> "");
-        canGenerate = month.isNotNull().and(loading.not());
+        // Task 3: the real rules (future month, empty branch selection)
+        Observable[] flags = branchSelected.values().toArray(Observable[]::new);
+        monthError = Bindings.createStringBinding(
+                () -> checkMonth(month.get()), month);
+        branchError = Bindings.createStringBinding(
+                () -> selectedBranches().isEmpty()
+                        ? "Select at least one branch." : "",
+                flags);
+        validationMessage = Bindings.createStringBinding(
+                () -> Stream.of(monthError.get(), branchError.get())
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.joining(" ")),
+                monthError, branchError);
+        valid = monthError.isEmpty().and(branchError.isEmpty());
+        canGenerate = valid.and(loading.not());
         totalRevenue = Bindings.createObjectBinding(
                 () -> summaries.stream()
                         .map(BranchSummary::revenue)
@@ -133,6 +147,17 @@ public final class ReportViewModel {
                 .filter(e -> e.getValue().get())
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    /** The month rule, with "today" from the injected clock. */
+    private String checkMonth(YearMonth m) {
+        if (m == null) {
+            return "Choose a month.";
+        }
+        if (m.isAfter(YearMonth.now(clock))) {
+            return "Month " + m + " is in the future.";
+        }
+        return "";
     }
 
     private void generate() {
@@ -164,7 +189,10 @@ public final class ReportViewModel {
 
                     @Override
                     public void failed(Throwable error) {
-                        // TODO Task 3: keep old data, set loadError + status
+                        // the old summaries stay on the screen
+                        loadError.set(error.getMessage() != null
+                                ? error.getMessage() : error.toString());
+                        status.set("Load failed, previous data kept.");
                         loading.set(false);
                     }
 

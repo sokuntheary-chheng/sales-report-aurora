@@ -33,6 +33,10 @@ public final class ReportView {
         month.setEditable(true);
         month.setConverter(new YearMonthConverter());
         month.valueProperty().bindBidirectional(vm.monthProperty());
+        // Task 3: the month box gets a red border while the rule refuses it
+        month.styleProperty().bind(Bindings
+                .when(vm.monthErrorProperty().isEmpty())
+                .then("").otherwise("-fx-border-color: crimson;"));
 
         HBox filters = new HBox(8, new Label("Month"), month);
         for (String b : ReportViewModel.BRANCHES) {

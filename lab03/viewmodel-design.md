@@ -159,7 +159,41 @@ classDiagram
     ReportViewModelTest --> ReportViewModel : observes properties
 ```
 
-## 5. Files added by Task 1
+## 5. Screen state machine (Task 3)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Incomplete
+    Incomplete --> Invalid : future month or no branch ticked
+    Incomplete --> Ready : month ok and a branch ticked
+    Invalid --> Ready : input fixed
+    Ready --> Invalid : input changed
+    Ready --> Loading : generate
+    Loading --> Loaded : succeeded
+    Loading --> Failed : failed
+    Loading --> Ready : cancelled
+    Loaded --> Loading : generate again
+    Failed --> Loading : generate again
+    Loaded --> Invalid : month cleared or all branches unticked
+    Failed --> Invalid : month cleared or all branches unticked
+```
+
+Property values per state (today = 2026-09-27, from the injected `Clock`):
+
+| state | `monthError` | `branchError` | `validationMessage` | `loading` | `canGenerate` | `status` | `loadError` | `summaries` |
+|---|---|---|---|---|---|---|---|---|
+| Incomplete | `Choose a month.` | (empty) or `Select at least one branch.` | the non-empty messages joined by a space | false | false | `Choose a month.` | empty | empty (or previous) |
+| Invalid | `Month 2026-10 is in the future.` or empty | `Select at least one branch.` or empty | the non-empty messages joined by a space | false | false | unchanged | empty | empty (or previous) |
+| Ready | empty | empty | empty | false | true | unchanged | empty | empty (or previous) |
+| Loading | empty | empty | empty | true | false | `Loading 2026-08...` | empty | unchanged until `succeeded` |
+| Loaded | empty | empty | empty | false | true | `Loaded 3 branch(es) for 2026-08.` | empty | the new rows; `totalRevenueText` = `USD …` |
+| Failed | empty | empty | empty | false | true | `Load failed, previous data kept.` | the exception message (e.g. `REP-2026-08-03.csv: unreadable`) | **the previous rows, kept** |
+
+Cancel during `Loading` goes back to `Ready` with
+`status = Cancelled, previous data kept.` and keeps the old `summaries`
+(Task 4).
+
+## 6. Files added by Task 1
 
 | File | Purpose |
 |---|---|
@@ -169,7 +203,7 @@ classDiagram
 | `src/main/java/edu/itc/salesreport/ui/BackgroundJobs.java` | threading port with progress and cancellation (starter, verbatim) |
 | `src/main/java/edu/itc/salesreport/ui/ReportViewModel.java` | Task 1 skeleton: state, commands, ports (starter, TODOs for Tasks 2–4) |
 
-## 6. Import rule check (Task 1, run on this code)
+## 7. Import rule check (Task 1, run on this code)
 
 ```text
 $ grep -n "^import javafx" src/main/java/edu/itc/salesreport/ui/ReportViewModel.java
