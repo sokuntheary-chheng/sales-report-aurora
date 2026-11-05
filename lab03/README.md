@@ -29,6 +29,7 @@ Pull request: **to be added after the PR is opened** (title
 | `src/main/java/…/ui/mvc/**`, `resources/…/ui/mvc/fx/report.fxml` | the Lab-02 MVC screens, moved in Task 2 (see Deviations) | Chheng Sokuntheary (Lab-02) |
 | `src/main/java/…/ingest/SalesDataGenerator.java` | extended with the measurement-month mode (default unchanged) | Chheng Sokuntheary |
 | `src/test/java/…/ui/ReportViewModelTest.java` | 12 toolkit-free tests, fixed `Clock` | Chheng Sokuntheary |
+| `src/test/java/…/ui/ReportViewTest.java` | 3 tests: the month box commits typed text on Enter and on focus loss, without starting the toolkit | Chheng Sokuntheary |
 | `src/test/java/…/ui/ViewModelImportsTest.java` | import guard: `javafx.base` only | brief starter |
 | `src/test/java/…/ui/ManualJobs.java` | test double for the jobs port | brief starter |
 | `src/test/java/UiIndependenceTest.java` | allowlist updated for the moved MVC packages and the view layer | Chheng Sokuntheary |
@@ -54,6 +55,7 @@ Pull request: **to be added after the PR is opened** (title
 | 2026-11-05 | Task 3 · validation, error and cancel states (`e9911b3`) | Chheng Sokuntheary | No |
 | 2026-11-05 | Task 4 · background jobs, benchmark harness, measurement data (`69ce513`) | Chheng Sokuntheary | No |
 | 2026-11-05 | Task 5 · tests, import guard, comparison, this README (this commit) | Chheng Sokuntheary | No |
+| 2026-11-06 | After Task 5 · the month box commits a typed month on Enter and on focus loss, +3 tests (this commit) | Chheng Sokuntheary | No |
 
 ## Deviations
 

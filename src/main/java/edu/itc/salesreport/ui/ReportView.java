@@ -7,6 +7,7 @@ import java.time.format.DateTimeParseException;
 import java.util.function.Function;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -18,21 +19,40 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
-/** Task 2 skeleton: build controls and bind them. No logic here. */
+/**
+ * Build the controls and bind them. The one piece of logic the view keeps
+ * is committing what the user typed into the month box (Enter, focus loss).
+ */
 public final class ReportView {
 
     private final BorderPane root = new BorderPane();
 
+    /** The month box; the tests commit into it without opening a window. */
+    private final ComboBox<YearMonth> month;
+
     public ReportView(ReportViewModel vm) {
-        ComboBox<YearMonth> month = new ComboBox<>(vm.monthChoices());
+        month = new ComboBox<>(vm.monthChoices());
         month.setEditable(true);
         month.setConverter(new YearMonthConverter());
         month.valueProperty().bindBidirectional(vm.monthProperty());
+        // A typed month does not reach the value by itself: the view has to
+        // commit the editor text when Enter is pressed (the key lands on the
+        // box or on its editor) ...
+        month.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                commitMonth(month);
+            }
+        });
+        // ... and when focus leaves the box or its editor
+        month.focusedProperty().addListener(focusLossCommit(month));
+        month.getEditor().focusedProperty().addListener(focusLossCommit(month));
         // Task 3: the month box gets a red border while the rule refuses it
         month.styleProperty().bind(Bindings
                 .when(vm.monthErrorProperty().isEmpty())
@@ -105,6 +125,30 @@ public final class ReportView {
 
     public Parent root() {
         return root;
+    }
+
+    /** The month box; the tests cannot open a window. */
+    ComboBox<YearMonth> monthBox() {
+        return month;
+    }
+
+    /**
+     * Commits the typed text of the editor into the value, so the binding
+     * passes it on to the ViewModel. Text no rule understands becomes null
+     * and the ViewModel answers "Choose a month.".
+     */
+    static void commitMonth(ComboBox<YearMonth> box) {
+        box.setValue(((YearMonthConverter) box.getConverter())
+                .fromString(box.getEditor().getText()));
+    }
+
+    /** Commits the typed text when focus was on the box and no longer is. */
+    static ChangeListener<Boolean> focusLossCommit(ComboBox<YearMonth> box) {
+        return (obs, hadFocus, hasFocus) -> {
+            if (hadFocus && !hasFocus) {
+                commitMonth(box);
+            }
+        };
     }
 
     /** Text "2026-09" to YearMonth and back; null for unparsable input. */
