@@ -1,5 +1,9 @@
-package edu.itc.salesreport.ui;
+package edu.itc.salesreport.ui.mvc;
 
+import edu.itc.salesreport.ui.ErrorDisplay;
+import edu.itc.salesreport.ui.InputRules;
+import edu.itc.salesreport.ui.ReportCommand;
+import edu.itc.salesreport.ui.SalesModel;
 import edu.itc.salesreport.ui.Validation.Invalid;
 import edu.itc.salesreport.ui.Validation.Valid;
 

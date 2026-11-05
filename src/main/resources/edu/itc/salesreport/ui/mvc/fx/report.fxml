@@ -17,7 +17,7 @@
      The controller class ReportFxmlView only wires the widgets. -->
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="edu.itc.salesreport.ui.fx.ReportFxmlView">
+            fx:controller="edu.itc.salesreport.ui.mvc.fx.ReportFxmlView">
 
     <top>
         <HBox spacing="8" alignment="CENTER_LEFT" BorderPane.alignment="CENTER_LEFT">
