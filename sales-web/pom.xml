@@ -31,7 +31,7 @@
     <dependency>
       <groupId>edu.itc</groupId>
       <artifactId>sales-report</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
