@@ -15,3 +15,5 @@ secret*.md
 
 # task list of the local tooling
 Todo.json
+
+data-manual/
