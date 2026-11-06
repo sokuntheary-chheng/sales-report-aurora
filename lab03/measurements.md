@@ -182,21 +182,52 @@ Conclusion: the background version stayed usable during the load; the caller-thr
 ## Screenshot `lab03/screenshots/viewer.png` — DONE
 
 Captured by the author and committed as `2655541` (PNG, 812 × 632,
-48,791 bytes). The steps that were run:
+48,791 bytes) with the MVVM viewer loaded for 2026-08, all three
+branches ticked:
 
 ```bash
-# restore the calibrated sample month (default generator mode rewrites
-# 2026-09 and 2026-08 from the fixed seed)
-java -cp target/classes edu.itc.salesreport.ingest.SalesDataGenerator data
-
-# Lab-02 screen (same code, moved to ui.mvc in Task 2) for the comparison
-mvn -q javafx:run "-Djavafx.mainClass=edu.itc.salesreport.ui.mvc.fx.ReportApp" "-Djavafx.args=2026-08"
-
-# the Lab-03 MVVM viewer, then tick PNH, REP, BTB and press Generate
+# the MVVM viewer, then tick PNH, REP, BTB and press Generate
 mvn -q javafx:run
 ```
 
-Both must show the same three figures for 2026-08 — PNH 8,737.76,
-REP 9,448.49, BTB 9,426.38, chain 27,612.63 (the values already verified
-with a headless harness in Task 2) — and `viewer.png` is saved from the
-MVVM window after the load finished.
+The screenshot shows the month that was in `data/2026-08` on 2026-11-05
+— the 465,000-row measurement month generated for Task 4:
+
+| Branch | Revenue | Receipts |
+|---|---|---|
+| PNH | 1,762,807.00 | 51,677 |
+| REP | 1,752,696.55 | 51,677 |
+| BTB | 1,753,617.65 | 51,677 |
+| chain | **USD 5,269,121.20** | |
+
+The lab's Task 2 check is that these three revenues are identical to the
+Lab-02 viewer's. Both code paths were run headlessly on the same files
+(the Lab-02 `SalesModel` reads the whole month once and filters per
+branch; the Lab-03 source reads each branch's files with
+`CsvMonthReader.readBranch`) — output pasted verbatim:
+
+```text
+branch  MVC revenue        MVVM revenue       equal
+PNH     1762807.00         1762807.00         true
+REP     1752696.55         1752696.55         true
+BTB     1753617.65         1753617.65         true
+chain (MVVM sum): 5269121.20
+```
+
+(The calibrated sample month — PNH 8,737.76, REP 9,448.49, BTB 9,426.38,
+chain 27,612.63 — is written back by
+`java -cp target/classes edu.itc.salesreport.ingest.SalesDataGenerator data`;
+`data/2026-08` currently holds the measurement month used for Task 4.)
+
+## Screenshot `lab03/screenshots/dashboard.png` — challenge
+
+Both windows the app opens, after loading 2026-08: the viewer (left) and
+the always-on-top dashboard (right), bound to the same
+`ReportViewModel`, showing the same month and the same chain revenue
+(USD 5,269,121.20) and "3 branch(es) loaded". Captured from the screen
+with a probe kept out of the repository (gitignored `target/jfxprobe/`)
+that starts `ReportViewerApp`'s composition — same `SummarySource`,
+`FxBackgroundJobs`, `ReportViewModel`, `ReportView` and
+`DashboardWindow.open(vm)` — picks 2026-08, presses Generate and waits
+for the load to finish; the two window rectangles are cropped to their
+visible bounds and placed side by side on white.

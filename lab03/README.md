@@ -17,9 +17,12 @@ Pull request: **to be added after the PR is opened** (title
 | `lab03/mvc-vs-mvvm.md` | Task 5: the two versions compared with own numbers | Chheng Sokuntheary |
 | `lab03/README.md` | this file: files, reused inputs, change log, deviations | Chheng Sokuntheary |
 | `lab03/screenshots/viewer.png` | Task 2: the running viewer on 2026-08 | Chheng Sokuntheary |
+| `lab03/screenshots/dashboard.png` | ★ Challenge: viewer and dashboard side by side on the same ViewModel | Chheng Sokuntheary |
+| `lab03/platform-mapping.md` | ★ Challenge: every ViewModel member mapped to Jetpack and WPF, with what would not carry over | Chheng Sokuntheary |
 | `src/main/java/…/ui/ReportViewModel.java` | the ViewModel: observable state, validation, load orchestration | Chheng Sokuntheary |
 | `src/main/java/…/ui/ReportView.java` | the JavaFX view: controls and bindings, no logic | Chheng Sokuntheary |
-| `src/main/java/…/ui/ReportViewerApp.java` | the composition root of the viewer (`SummarySource` adapter) | Chheng Sokuntheary |
+| `src/main/java/…/ui/ReportViewerApp.java` | the composition root of the viewer (`SummarySource` adapter); opens the challenge dashboard on the same ViewModel | Chheng Sokuntheary |
+| `src/main/java/…/ui/DashboardView.java`, `DashboardWindow.java` | ★ Challenge: the compact dashboard and its second `Stage`, bound to the same `ReportViewModel` | Chheng Sokuntheary |
 | `src/main/java/…/ui/BackgroundJobs.java`, `SummarySource.java` | ports (load jobs, branch summaries) | brief starter / Chheng Sokuntheary |
 | `src/main/java/…/ui/Command.java`, `DelegateCommand.java` | command port and implementation | brief starter |
 | `src/main/java/…/ui/CallerThreadJobs.java` | synchronous jobs (benchmark mode) | Chheng Sokuntheary |
@@ -28,7 +31,9 @@ Pull request: **to be added after the PR is opened** (title
 | `src/main/java/…/ui/LoadBenchmarkApp.java` | the benchmark harness (adapted, see Deviations) | brief starter, adapted |
 | `src/main/java/…/ui/mvc/**`, `resources/…/ui/mvc/fx/report.fxml` | the Lab-02 MVC screens, moved in Task 2 (see Deviations) | Chheng Sokuntheary (Lab-02) |
 | `src/main/java/…/ingest/SalesDataGenerator.java` | extended with the measurement-month mode (default unchanged) | Chheng Sokuntheary |
-| `src/test/java/…/ui/ReportViewModelTest.java` | 12 toolkit-free tests, fixed `Clock` | Chheng Sokuntheary |
+| `src/main/java/…/ingest/CsvMonthReader.java` | `read(...)` unchanged plus `readBranch(...)` for the frame-gap fix | Chheng Sokuntheary |
+| `src/test/java/…/ingest/CsvMonthReaderTest.java` | 2 tests: `readBranch` keeps only that branch's files | Chheng Sokuntheary |
+| `src/test/java/…/ui/ReportViewModelTest.java` | 13 toolkit-free tests, fixed `Clock`, incl. two listeners on one ViewModel | Chheng Sokuntheary |
 | `src/test/java/…/ui/ReportViewTest.java` | 3 tests: the month box commits typed text on Enter and on focus loss, without starting the toolkit | Chheng Sokuntheary |
 | `src/test/java/…/ui/ViewModelImportsTest.java` | import guard: `javafx.base` only | brief starter |
 | `src/test/java/…/ui/ManualJobs.java` | test double for the jobs port | brief starter |
@@ -56,7 +61,32 @@ Pull request: **to be added after the PR is opened** (title
 | 2026-11-05 | Task 4 · background jobs, benchmark harness, measurement data (`69ce513`) | Chheng Sokuntheary | No |
 | 2026-11-05 | Task 5 · tests, import guard, comparison, this README (this commit) | Chheng Sokuntheary | No |
 | 2026-11-06 | After Task 5 · the month box commits a typed month on Enter and on focus loss, +3 tests (`fbda49f`) | Chheng Sokuntheary | No |
-| 2026-11-06 | After Task 5 · frame-gap fix: `readBranch` + layout before the clock, benchmark session 2 = 33 ms (this commit) | Chheng Sokuntheary | No |
+| 2026-11-06 | After Task 5 · frame-gap fix: `readBranch` + layout before the clock, benchmark session 2 = 33 ms (`ce8ca9e`, `78f0ead`) | Chheng Sokuntheary | No |
+| 2026-11-06 | ★ Challenge · `DashboardView` + `DashboardWindow` on the same ViewModel, two-listener test, `platform-mapping.md`, `dashboard.png` (this commit) | Chheng Sokuntheary | No |
+
+## (d) Challenge demonstration (requirement 3)
+
+Driven on the two real windows the app opens, one ViewModel throughout,
+with a probe kept out of the repository (gitignored `target/jfxprobe/`).
+Output pasted verbatim — every line is an observed state:
+
+```text
+initial: dashboard "Month: null", viewer table rows 0, Generate disabled true, Refresh disabled true
+viewer month -> 2026-09 : dashboard "Month: 2026-09"
+viewer month -> 2026-08 : dashboard "Month: 2026-08"
+dashboard Refresh pressed, during load: loading true, Generate disabled true, Refresh disabled true
+after dashboard Refresh: viewer table rows 3, status "Loaded 3 branch(es) for 2026-08.", Generate disabled false, Refresh disabled false
+viewer Generate pressed, during load: Generate disabled true, Refresh disabled true
+after viewer Generate: viewer chain "USD 5,269,121.20", dashboard "Month: 2026-08" + total label of the dashboard matches: true
+```
+
+What it shows: (1) changing the month in the viewer updates the
+dashboard's month label; (2) during a load both Generate and Refresh are
+disabled — checked on both a dashboard-initiated and a
+viewer-initiated load; (3) Refresh in the dashboard fills the viewer's
+table (0 → 3 rows), and after the load both windows show the same chain
+revenue, `USD 5,269,121.20`. `lab03/screenshots/dashboard.png` is the
+same two windows captured after a load.
 
 ## Deviations
 
@@ -105,6 +135,17 @@ Pull request: **to be added after the PR is opened** (title
    so the first layout of a brand-new screen is not counted as load time
    (the given harness replaces the root every run; a real window is
    already on display when Generate is clicked).
-10. **Not attempted:** the ★ Challenge (second view on the same ViewModel).
+10. **★ Challenge attempted and complete.** `DashboardView` is bound to
+    the same `ReportViewModel` instance the viewer uses, opened by
+    `DashboardWindow.open(vm)` from `ReportViewerApp`; the ViewModel was
+    not touched for it (`git diff lab-03-task5 -- …/ReportViewModel.java`
+    is empty, tag `lab-03-task5` → `dfc3e5c`);
+    `ReportViewModelTest.twoViewsOnTheSameViewModelBothSeeTheTotal` shows
+    two listeners on one property both receiving `USD 600.00`;
+    `lab03/platform-mapping.md` maps every member to Jetpack and WPF;
+    `lab03/screenshots/dashboard.png` shows both windows agreeing. The
+    dashboard adds `setAlwaysOnTop(true)` (the scenario asks for an
+    always-on-top window) and disables Refresh through
+    `Bindings.not(vm.generateCommand().executableProperty())`.
 11. **Pending by the author:** the 3–5 sentences of manual observation in
     `lab03/measurements.md` (its benchmark section is already complete).

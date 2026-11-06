@@ -208,4 +208,23 @@ class ReportViewModelTest {
         assertEquals("Loaded 3 branch(es) for 2026-08.",
                 vm.statusProperty().get());
     }
+
+    @Test
+    void twoViewsOnTheSameViewModelBothSeeTheTotal() {
+        // the viewer and the dashboard, two listeners on one property
+        var viewer = new ArrayList<String>();
+        var dashboard = new ArrayList<String>();
+        vm.totalRevenueTextProperty().addListener(
+                (obs, was, now) -> viewer.add(now));
+        vm.totalRevenueTextProperty().addListener(
+                (obs, was, now) -> dashboard.add(now));
+
+        vm.monthProperty().set(AUG);
+        vm.generateCommand().execute();
+        jobs.runNext();
+
+        assertEquals("USD 600.00", viewer.get(viewer.size() - 1));
+        assertEquals("USD 600.00", dashboard.get(dashboard.size() - 1));
+        assertEquals(viewer, dashboard);
+    }
 }

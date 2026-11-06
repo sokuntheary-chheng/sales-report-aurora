@@ -46,6 +46,9 @@ public class ReportViewerApp extends Application {
         stage.setScene(new Scene(new ReportView(vm).root(), 960, 600));
         stage.setTitle("Angkor Mart · Monthly report (MVVM)");
         stage.show();
+        // Challenge: a second window on the SAME ViewModel, so both
+        // windows always show the same month, total and loading state
+        DashboardWindow.open(vm);
     }
 
     @Override
