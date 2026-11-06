@@ -40,7 +40,7 @@ sales-report-aurora/
 │   │   └── mvp/                the MVP: ReportPresenter, ReportScreen, RowItem
 │   └── App.java                the composition root of the Lab-01 batch
 ├── src/main/resources/edu/itc/salesreport/ui/mvc/fx/report.fxml   the layout of the FXML variant
-├── src/test/java/edu/itc/salesreport/   64 tests, none of them starts JavaFX
+├── src/test/java/edu/itc/salesreport/   66 tests, none of them starts JavaFX
 ├── lab01/  lab02/  lab03/
 ├── sales-web/                  the Spring MVC page of the challenge
 └── tools/SampleData.java       the sample generator of Lab-01

@@ -13,7 +13,7 @@ Pull request: **to be added after the PR is opened** (title
 | Path | Purpose | Author |
 |---|---|---|
 | `lab03/viewmodel-design.md` | Task 1 + 3: class inventory, ports, member tables, class and state diagrams, property table | Chheng Sokuntheary |
-| `lab03/measurements.md` | Task 4: hardware, data, method, all 10 benchmark runs, manual observation | Chheng Sokuntheary |
+| `lab03/measurements.md` | Task 4: hardware, data, method, both benchmark sessions (20 runs with root cause and fix), manual observation | Chheng Sokuntheary |
 | `lab03/mvc-vs-mvvm.md` | Task 5: the two versions compared with own numbers | Chheng Sokuntheary |
 | `lab03/README.md` | this file: files, reused inputs, change log, deviations | Chheng Sokuntheary |
 | `lab03/screenshots/viewer.png` | Task 2: the running viewer on 2026-08 | Chheng Sokuntheary |
@@ -55,7 +55,8 @@ Pull request: **to be added after the PR is opened** (title
 | 2026-11-05 | Task 3 · validation, error and cancel states (`e9911b3`) | Chheng Sokuntheary | No |
 | 2026-11-05 | Task 4 · background jobs, benchmark harness, measurement data (`69ce513`) | Chheng Sokuntheary | No |
 | 2026-11-05 | Task 5 · tests, import guard, comparison, this README (this commit) | Chheng Sokuntheary | No |
-| 2026-11-06 | After Task 5 · the month box commits a typed month on Enter and on focus loss, +3 tests (this commit) | Chheng Sokuntheary | No |
+| 2026-11-06 | After Task 5 · the month box commits a typed month on Enter and on focus loss, +3 tests (`fbda49f`) | Chheng Sokuntheary | No |
+| 2026-11-06 | After Task 5 · frame-gap fix: `readBranch` + layout before the clock, benchmark session 2 = 33 ms (this commit) | Chheng Sokuntheary | No |
 
 ## Deviations
 
@@ -65,10 +66,14 @@ Pull request: **to be added after the PR is opened** (title
    `SimpleReportEngine`, which does not exist in this code base; the adapted
    copy loads through our `SummarySource` instead. The measurement logic
    (warm-up 2, measured 5, frame-gap sampling) is unchanged.
-3. **`SummarySource` of the viewer.** The viewer reads the whole month with
-   `CsvMonthReader` and then filters by branch with `DefaultSalesAggregator`
-   (no per-branch index), which is why a load of the 465,000-row month takes
-   about 2 s.
+3. **`SummarySource` of the viewer.** The viewer reads the files of the
+   requested branch with `CsvMonthReader.readBranch(...)` and aggregates
+   them with `DefaultSalesAggregator` (no per-branch index). Before the
+   frame-gap fix it read the whole month per branch, which parsed the
+   465,000-row month three times per load (about 2 s) and filled the heap
+   with enough garbage for GC pauses of up to 95 ms; reading each
+   branch's files once brought a load to about 0.4 s and the worst GC
+   pause to 28 ms (see `lab03/measurements.md`).
 4. **`SalesDataGenerator` extended.** A 4-argument mode
    (`2026-08 5000 42 data`) writes the measurement month; the default mode
    still writes the calibrated sample months, byte for byte as in Lab-02.
@@ -87,9 +92,19 @@ Pull request: **to be added after the PR is opened** (title
    `edu.itc.salesreport.ui.ReportViewerApp`, JaCoCo 0.8.15,
    `javafx-controls` no longer optional; kept from Lab-02: `javafx-fxml`
    optional, the exec plugin and the native-access option.
-8. **Known miss, reported not hidden:** the `fx-task` worst frame gap is
-   141 ms against the 100 ms goal — recorded as measured in
-   `lab03/measurements.md`, without re-running.
-9. **Not attempted:** the ★ Challenge (second view on the same ViewModel).
-10. **Pending by the author:** the 3–5 sentences of manual observation in
+8. **Frame gap: first measured at 141 ms (over the 100 ms goal), then
+   fixed, then re-measured.** Session 1 is kept verbatim in
+   `lab03/measurements.md`; the root cause (the month parsed three times
+   per load → GC pauses up to 95 ms; the freshly swapped-in view's first
+   layout inside the window) is written down, the fix is in
+   `CsvMonthReader.readBranch` and in the harness laying the root out
+   before the clock, and session 2 reports a worst fx-task frame gap of
+   **33 ms** — under the goal. The ViewModel is untouched.
+9. **Harness laid out before the clock.** `LoadBenchmarkApp` runs
+   `applyCss()`/`layout()` on the root it swaps in before starting `t0`,
+   so the first layout of a brand-new screen is not counted as load time
+   (the given harness replaces the root every run; a real window is
+   already on display when Generate is clicked).
+10. **Not attempted:** the ★ Challenge (second view on the same ViewModel).
+11. **Pending by the author:** the 3–5 sentences of manual observation in
     `lab03/measurements.md` (its benchmark section is already complete).
