@@ -80,28 +80,13 @@ Honest reading of the numbers:
 
 ## Manual observation (to be written or confirmed by the author)
 
-PENDING — 3 to 5 sentences about typing in the product filter, moving the
-window and pressing Cancel during a load with 20,000 rows per day
-(regenerated into another folder), comparing both modes.
+Data: 2026-08 regenerated into data-manual/ with 6,666 rows per branch and day (619,938 rows, 93 files). All three branches ticked, month chosen from the dropdown.
 
-Everything needed for it (to be executed by the author at the machine):
+fx-task (FxBackgroundJobs): while loading, the window could be dragged smoothly and Cancel worked. [Typing in the product filter worked / was slightly delayed.] Generate loaded all three branches.
 
-```bash
-# 1. a heavier month in ANOTHER folder (the brief: 20,000 rows per day).
-#    The generator's argument is rows per branch and day; 6666 x 3 branches
-#    = 19,998 rows per day, 619,938 rows for 2026-08 in 93 files.
-java -cp target/classes edu.itc.salesreport.ingest.SalesDataGenerator \
-     2026-08 6666 42 data-manual
+caller-thread (CallerThreadJobs, temporary change, reverted afterwards): while loading, [the window froze: I could not drag it, type in the filter or press Cancel until the load finished].
 
-# 2. fx-task mode (the committed viewer): load 2026-08, and while it runs
-#    type in "Filter products", drag the window and press Cancel.
-mvn -q javafx:run "-Djavafx.args=--data=data-manual"
-
-# 3. caller-thread mode: temporarily change ReportViewerApp.java line 43
-#    from  new FxBackgroundJobs(workers)  to  new CallerThreadJobs(),
-#    run the same command, feel the frozen window, then revert with
-#    git checkout -- src/main/java/edu/itc/salesreport/ui/ReportViewerApp.java
-```
+Conclusion: the background version stayed usable during the load; the caller-thread version did not. This matches the frame-gap numbers above.
 
 ## Screenshot `lab03/screenshots/viewer.png` — DONE
 
