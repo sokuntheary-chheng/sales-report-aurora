@@ -24,18 +24,20 @@ public class ReportViewerApp extends Application {
         Path dataDir = Path.of(getParameters().getNamed()
                 .getOrDefault("data", "data"));
         // adapt YOUR Lab-02 model here; the model code stays unchanged:
-        // read the month, keep the rows of one branch, aggregate them
+        // read the files of one branch of the month and aggregate them
+        // (Lab-02's SalesModel read the month once and kept the rows of
+        // one branch; reading every branch's rows for every branch parsed
+        // the month three times per load)
         var reader = new CsvMonthReader(new CsvTransactionParser());
         var aggregator = new DefaultSalesAggregator();
         SummarySource source = (month, branch) -> {
             MonthData data;
             try {
-                data = reader.read(dataDir, month);
+                data = reader.readBranch(dataDir, month, branch);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            return aggregator.summarize(branch, data.rows().stream()
-                    .filter(row -> row.branch().equals(branch)).toList());
+            return aggregator.summarize(branch, data.rows());
         };
         // Task 4: one virtual thread per job; the UI stays responsive
         workers = Executors.newVirtualThreadPerTaskExecutor();

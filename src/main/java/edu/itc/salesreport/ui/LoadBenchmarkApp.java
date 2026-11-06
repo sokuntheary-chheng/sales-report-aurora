@@ -50,15 +50,17 @@ public class LoadBenchmarkApp extends Application {
         int warmup = Integer.parseInt(args.getOrDefault("warmup", "2"));
         int runs = Integer.parseInt(args.getOrDefault("runs", "5"));
         // adapt YOUR Lab-02 model here (the lab's SimpleReportEngine does
-        // not exist in this repository): read the month, keep the rows of
-        // one branch, aggregate them
+        // not exist in this repository): read the files of one branch of
+        // the month and aggregate them. Lab-02's SalesModel read the month
+        // once and kept the rows of one branch; reading all three branch
+        // files for every branch parsed the month three times and filled
+        // the heap with garbage (GC pauses of 60-95 ms in the frame gap).
         var reader = new CsvMonthReader(new CsvTransactionParser());
         var aggregator = new DefaultSalesAggregator();
         SummarySource source = (m, b) -> {
             try {
-                var data = reader.read(dataDir, m);
-                return aggregator.summarize(b, data.rows().stream()
-                        .filter(row -> row.branch().equals(b)).toList());
+                var data = reader.readBranch(dataDir, m, b);
+                return aggregator.summarize(b, data.rows());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -85,7 +87,14 @@ public class LoadBenchmarkApp extends Application {
                 ? new CallerThreadJobs() : new FxBackgroundJobs(workers);
         var vm = new ReportViewModel(src, jobs, Clock.systemDefaultZone());
         vm.monthProperty().set(month);
-        stage.getScene().setRoot(new ReportView(vm).root());
+        // The harness swaps in a fresh view for every run. Lay it out
+        // before the clock starts: in the real window the screen is
+        // already on display when Generate is clicked, so its first
+        // layout must not be measured as part of the load.
+        var root = new ReportView(vm).root();
+        stage.getScene().setRoot(root);
+        root.applyCss();
+        root.layout();
 
         long t0 = System.nanoTime();
         monitor.reset();
