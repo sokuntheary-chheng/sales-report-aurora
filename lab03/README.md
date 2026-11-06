@@ -1,95 +1,118 @@
-# Lab-03 · What changed (Task 5)
+# Lab-03: Model View ViewModel (MVVM) design pattern
 
-Lab-03 of the Software Engineering course: the Lab-02 screen refactored to
-MVVM — an observable `ReportViewModel` behind a JavaFX view, tested without
-a toolkit, with load measurements. Team **Aurora**, one member:
-Chheng Sokuntheary.
+Team: Aurora · Member: sokuntheary-chheng (Chheng Sokuntheary)
 
-Pull request: **to be added after the PR is opened** (title
-`Lab-03 – Aurora`, branch `lab-03`).
+The lab refactors the Lab-02 Angkor Mart report viewer from MVC to MVVM: a
+`ReportViewModel` with properties, commands and validation, a view that only
+creates controls and binds them, background loading with progress and
+cancellation, and ViewModel tests that never start JavaFX.
 
-## (a) Files of this lab
+> **This lab was worked on alone.** The brief asks for pairs and for commits
+> from both members. The team Aurora has one member, so every commit carries
+> one name. The lab was still worked through task by task, with one commit per
+> task.
 
-| Path | Purpose | Author |
-|---|---|---|
-| `lab03/viewmodel-design.md` | Task 1 + 3: class inventory, ports, member tables, class and state diagrams, property table | Chheng Sokuntheary |
-| `lab03/measurements.md` | Task 4: hardware, data, method, all 10 benchmark runs, manual observation | Chheng Sokuntheary |
-| `lab03/mvc-vs-mvvm.md` | Task 5: the two versions compared with own numbers | Chheng Sokuntheary |
-| `lab03/README.md` | this file: files, reused inputs, change log, deviations | Chheng Sokuntheary |
-| `lab03/screenshots/viewer.png` | Task 2: the running viewer on 2026-08 | Chheng Sokuntheary |
-| `src/main/java/…/ui/ReportViewModel.java` | the ViewModel: observable state, validation, load orchestration | Chheng Sokuntheary |
-| `src/main/java/…/ui/ReportView.java` | the JavaFX view: controls and bindings, no logic | Chheng Sokuntheary |
-| `src/main/java/…/ui/ReportViewerApp.java` | the composition root of the viewer (`SummarySource` adapter) | Chheng Sokuntheary |
-| `src/main/java/…/ui/BackgroundJobs.java`, `SummarySource.java` | ports (load jobs, branch summaries) | brief starter / Chheng Sokuntheary |
-| `src/main/java/…/ui/Command.java`, `DelegateCommand.java` | command port and implementation | brief starter |
-| `src/main/java/…/ui/CallerThreadJobs.java` | synchronous jobs (benchmark mode) | Chheng Sokuntheary |
-| `src/main/java/…/ui/FxBackgroundJobs.java` | `javafx.concurrent.Task` jobs, progress and cancel | Chheng Sokuntheary |
-| `src/main/java/…/ui/FrameGapMonitor.java` | frame-gap sampling for Task 4 | brief starter |
-| `src/main/java/…/ui/LoadBenchmarkApp.java` | the benchmark harness (adapted, see Deviations) | brief starter, adapted |
-| `src/main/java/…/ui/mvc/**`, `resources/…/ui/mvc/fx/report.fxml` | the Lab-02 MVC screens, moved in Task 2 (see Deviations) | Chheng Sokuntheary (Lab-02) |
-| `src/main/java/…/ingest/SalesDataGenerator.java` | extended with the measurement-month mode (default unchanged) | Chheng Sokuntheary |
-| `src/test/java/…/ui/ReportViewModelTest.java` | 12 toolkit-free tests, fixed `Clock` | Chheng Sokuntheary |
-| `src/test/java/…/ui/ReportViewTest.java` | 3 tests: the month box commits typed text on Enter and on focus loss, without starting the toolkit | Chheng Sokuntheary |
-| `src/test/java/…/ui/ViewModelImportsTest.java` | import guard: `javafx.base` only | brief starter |
-| `src/test/java/…/ui/ManualJobs.java` | test double for the jobs port | brief starter |
-| `src/test/java/UiIndependenceTest.java` | allowlist updated for the moved MVC packages and the view layer | Chheng Sokuntheary |
-| `pom.xml` | `0.3.0-SNAPSHOT`, `app.main`, JaCoCo 0.8.15, JavaFX plugin main class | Chheng Sokuntheary |
-| `README.md` (root) | structure, build and run updated for Lab-03 | Chheng Sokuntheary |
-
-## (b) Inputs reused from Lab-02
-
-| Input | Reference |
+| | |
 |---|---|
-| The whole Lab-02 code base (model, ingest, engine, render, shared `ui` classes, `ui/mvp`, `ui/console`, `ui/fx` MVP adapters, `App.java`, data, tests) | tag **`lab-02-final`** → commit `7db39c9` |
-| Model package untouched | `git diff --stat lab-02-final -- src/main/java/edu/itc/salesreport/model` is **empty** |
-| Fallback starter A / B | **not used** — this lab refactors our own Lab-02 viewer (the brief's option for teams with a Lab-02 viewer) |
-| Brief starters (`ManualJobs`, `ViewModelImportsTest`, `FrameGapMonitor`, `LoadBenchmarkApp`) | copied from the lab text; `LoadBenchmarkApp` adapted to this code base (Deviation 2) |
+| Branch | `lab-03` |
+| Pull request | [`Lab-03 – Aurora` (#6)](https://github.com/sokuntheary-chheng/sales-report-aurora/pull/6) |
+| Java / Maven / JavaFX / JUnit | JDK 25 · Maven 3.9 · JavaFX 25.0.4 · JUnit 6.1 |
+| Tests | 64 in `mvn verify`, none of them starts JavaFX |
+| ViewModel coverage | `ReportViewModel`: 119 of 123 lines (96.7 %), JaCoCo 0.8.15 |
 
-## (c) Change log
+## The files of this lab
 
-| Date | What changed | Who | Model package changed? |
+Written deliverables:
+
+| File | Task | Author |
+|---|---|---|
+| `lab03/README.md` | 5 | sokuntheary-chheng |
+| `lab03/viewmodel-design.md` | 1, 3 | sokuntheary-chheng |
+| `lab03/measurements.md` | 4 | sokuntheary-chheng |
+| `lab03/mvc-vs-mvvm.md` | 5 | sokuntheary-chheng |
+| `lab03/screenshots/viewer.png` | 2 | sokuntheary-chheng |
+
+Code (`src/main/java/edu/itc/salesreport/ui/`) and tests:
+
+| File | Task | Author |
+|---|---|---|
+| `Command.java`, `DelegateCommand.java` | 1 | sokuntheary-chheng |
+| `SummarySource.java`, `BackgroundJobs.java` | 1 | sokuntheary-chheng |
+| `ReportViewModel.java` | 1-4 | sokuntheary-chheng |
+| `ReportView.java`, `ReportViewerApp.java` | 2 | sokuntheary-chheng |
+| `CallerThreadJobs.java` | 2 | sokuntheary-chheng |
+| `FxBackgroundJobs.java`, `FrameGapMonitor.java`, `LoadBenchmarkApp.java` | 4 | sokuntheary-chheng |
+| `src/test/.../ui/ManualJobs.java`, `ReportViewModelTest.java` (12 tests), `ViewModelImportsTest.java` | 5 | sokuntheary-chheng |
+| `src/test/.../ui/ReportViewTest.java` (3 tests, month box) | fix | sokuntheary-chheng |
+| `ui/mvc/` and `ui/mvc/fx/` (the Lab-02 MVC screen, moved) | 2 | sokuntheary-chheng |
+| `ingest/SalesDataGenerator.java` (extended) | 4 | sokuntheary-chheng |
+| `pom.xml` (0.3.0-SNAPSHOT, JaCoCo), `sales-web/pom.xml` (dependency version) | 0 | sokuntheary-chheng |
+
+## The inputs of Lab-02 that we reused
+
+| Input | Where | What we took from it | Commit or tag |
 |---|---|---|---|
-| 2026-11-05 | Task 0 · `lab-03` branch, `secret/` ignored, tag `lab-02-final` (`d342d42`) | Chheng Sokuntheary | No |
-| 2026-11-05 | Task 1 · `viewmodel-design.md`, verbatim starters (`c797419`) | Chheng Sokuntheary | No |
-| 2026-11-05 | Task 2 · MVC screens moved to `ui.mvc`, MVVM view + viewer (`cfc0b98`) | Chheng Sokuntheary | No |
-| 2026-11-05 | Task 3 · validation, error and cancel states (`e9911b3`) | Chheng Sokuntheary | No |
-| 2026-11-05 | Task 4 · background jobs, benchmark harness, measurement data (`69ce513`) | Chheng Sokuntheary | No |
-| 2026-11-05 | Task 5 · tests, import guard, comparison, this README (this commit) | Chheng Sokuntheary | No |
-| 2026-11-06 | After Task 5 · the month box commits a typed month on Enter and on focus loss, +3 tests (this commit) | Chheng Sokuntheary | No |
+| Maven project, `model`, `ingest`, `engine` | Lab-02 | the records, `CsvMonthReader`, `DefaultSalesAggregator` behind `SummarySource` | tag `lab-02-final` |
+| MVC viewer | Lab-02, `ui.ReportController`, `ui.fx.ReportView` | logic moved into the ViewModel; classes kept as the baseline in `ui.mvc` | tag `lab-02-final` |
+| Sample data | `SalesDataGenerator` | measurement data (see Deviations) | tag `lab-02-final` |
 
-## Deviations
+Fallback starters A and B were not used.
 
-1. **Solo work.** The team has one member, so every commit is authored by
-   Chheng Sokuntheary; the brief's "both members as authors" does not apply.
-2. **`LoadBenchmarkApp` adapted.** The brief's harness loads through
-   `SimpleReportEngine`, which does not exist in this code base; the adapted
-   copy loads through our `SummarySource` instead. The measurement logic
-   (warm-up 2, measured 5, frame-gap sampling) is unchanged.
-3. **`SummarySource` of the viewer.** The viewer reads the whole month with
-   `CsvMonthReader` and then filters by branch with `DefaultSalesAggregator`
-   (no per-branch index), which is why a load of the 465,000-row month takes
-   about 2 s.
-4. **`SalesDataGenerator` extended.** A 4-argument mode
-   (`2026-08 5000 42 data`) writes the measurement month; the default mode
-   still writes the calibrated sample months, byte for byte as in Lab-02.
-5. **`UiIndependenceTest` updated.** `ui/mvc` was added to the scanned
-   packages, and the Lab-03 view-layer files that live directly in `ui`
-   (they use `javafx.base` only) are allowlisted there;
-   `ViewModelImportsTest` guards `ReportViewModel` more strictly.
-6. **Lab-02 screens moved.** `ReportController` → `ui.mvc`;
-   `ReportView`, `ReportApp`, `ReportFxmlApp`, `ReportFxmlView`,
-   `FatReportController`, `report.fxml` → `ui.mvc.fx`; the matching test →
-   `ui/mvc`. Shared classes (`SalesModel`, `SalesEvent`, `InputRules`,
-   `Validation`, `ReportCommand`, `ErrorDisplay`, `ui.mvp`) stayed where
-   they were. The model package is untouched (diff against `lab-02-final`
-   empty).
-7. **`pom.xml`.** Version `0.3.0-SNAPSHOT`, `app.main` defaulting to
-   `edu.itc.salesreport.ui.ReportViewerApp`, JaCoCo 0.8.15,
-   `javafx-controls` no longer optional; kept from Lab-02: `javafx-fxml`
-   optional, the exec plugin and the native-access option.
-8. **Known miss, reported not hidden:** the `fx-task` worst frame gap is
-   141 ms against the 100 ms goal — recorded as measured in
-   `lab03/measurements.md`, without re-running.
-9. **Not attempted:** the ★ Challenge (second view on the same ViewModel).
-10. **Pending by the author:** the 3–5 sentences of manual observation in
-    `lab03/measurements.md` (its benchmark section is already complete).
+## How to build and run
+
+```bash
+mvn -q verify                                     # tests and JaCoCo, no display needed
+java -cp target/classes edu.itc.salesreport.ingest.SalesDataGenerator data
+mvn -q javafx:run                                 # the MVVM viewer
+mvn -q javafx:run "-Dapp.main=edu.itc.salesreport.ui.LoadBenchmarkApp" "-Djavafx.args=--data=data --month=2026-08"
+```
+
+The benchmark opens a window and must run on a desktop. The Lab-02 MVC screen
+is still available as `edu.itc.salesreport.ui.mvc.fx.ReportApp`.
+
+## The screenshot
+
+| File | What it shows |
+|---|---|
+| `lab03/screenshots/viewer.png` | the MVVM viewer after Generate for 2026-08 with all three branches ticked |
+
+## Results
+
+* The `model` package is unchanged versus `lab-02-final` (`git diff --stat` is empty).
+* Benchmark, 465,000 rows, 5 measured runs per mode (all runs in `measurements.md`):
+
+| Mode | Mean load | Worst frame gap |
+|---|---|---|
+| caller thread | 2420 ms | 2990 ms |
+| background Task | 2064 ms | 141 ms |
+
+The 100 ms goal for the background Task was **not** met. The numbers are
+reported as measured, without a re-run.
+
+## Notes and deviations
+
+* **The work was done alone.** One member, one name on every commit.
+* **`SummarySource` is adapted to this repository.** The lab calls
+  `SimpleReportEngine`; here the source reads the month with `CsvMonthReader`
+  and aggregates one branch with `DefaultSalesAggregator`. The same one-line
+  adaptation is in `LoadBenchmarkApp`, which is otherwise the official harness.
+* **`SalesDataGenerator` is extended** (month, rows per branch and day, seed,
+  target folder); the old mode still works and `model` is not touched.
+* **The Lab-02 MVC screen moved to `ui.mvc` and `ui.mvc.fx`.** Shared classes
+  (`SalesModel`, `SalesEvent`, `InputRules`, `Validation`, `ReportCommand`,
+  `ErrorDisplay`, `ui.mvp`) stay where they were.
+* **`UiIndependenceTest` was adjusted**, because the Lab-03 view in `ui` uses
+  `javafx.scene`; `ViewModelImportsTest` guards the ViewModel instead.
+* **`sales-web` depends on `0.3.0-SNAPSHOT`** after the version bump.
+* **The month box commits a typed month on Enter and on focus loss.** Found
+  in manual testing and fixed; a disabled Generate button still needs Enter
+  first.
+* **The manual responsiveness check used 6,666 rows per branch and day**
+  (619,938 rows).
+* **The optional challenge was not attempted.**
+
+## Change log
+
+| Date | Lab | Change | Model package changed? | Commit or tag |
+|---|---|---|---|---|
+| 07-11-2026 | Lab-03 | MVVM refactoring (Tasks 1-5), tests, measurements, documents | No | PR #7 |

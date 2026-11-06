@@ -43,6 +43,7 @@ class UiIndependenceTest {
     private static final List<String> UI_VIEW_LAYER = List.of(
             "Command.java", "DelegateCommand.java",
             "ReportView.java", "ReportViewerApp.java",
+            "DashboardView.java", "DashboardWindow.java",
             "FxBackgroundJobs.java", "FrameGapMonitor.java",
             "LoadBenchmarkApp.java", "ReportViewModel.java");
 
