@@ -6,15 +6,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.itc</groupId>
   <artifactId>sales-report</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <name>Angkor Mart monthly sales report</name>
 
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javafx.version>25.0.4</javafx.version>
-    <!-- override on the command line: -Djavafx.mainClass=... -->
-    <javafx.mainClass>edu.itc.salesreport.ui.fx.ReportApp</javafx.mainClass>
+    <!-- override on the command line: -Dapp.main=... -->
+    <app.main>edu.itc.salesreport.ui.ReportViewerApp</app.main>
   </properties>
 
   <dependencyManagement>
@@ -30,15 +30,13 @@
   </dependencyManagement>
 
   <dependencies>
-    <!-- JavaFX is optional so that projects reusing the domain (the Lab-02
-         challenge) do not inherit it; the architecture test forbids JavaFX
-         in model, ingest, engine, ui and ui.mvp. -->
+    <!-- non-optional in Lab-03: the MVVM viewer needs it at runtime -->
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
       <version>${javafx.version}</version>
-      <optional>true</optional>
     </dependency>
+    <!-- stays optional: only the Lab-02 FXML variant uses it -->
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-fxml</artifactId>
@@ -65,11 +63,24 @@
         <version>3.5.6</version>
       </plugin>
       <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.15</version>
+        <executions>
+          <execution><goals><goal>prepare-agent</goal></goals></execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals><goal>report</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <mainClass>${javafx.mainClass}</mainClass>
+          <mainClass>${app.main}</mainClass>
           <options>
             <option>--enable-native-access=javafx.graphics</option>
           </options>

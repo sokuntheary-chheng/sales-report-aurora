@@ -1,7 +1,7 @@
-package edu.itc.salesreport.ui.fx.legacy;
+package edu.itc.salesreport.ui.mvc.fx;
 
 import edu.itc.salesreport.ui.ErrorDisplay;
-import edu.itc.salesreport.ui.ReportController;
+import edu.itc.salesreport.ui.mvc.ReportController;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;

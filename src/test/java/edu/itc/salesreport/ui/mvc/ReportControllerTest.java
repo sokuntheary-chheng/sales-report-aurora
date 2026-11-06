@@ -1,9 +1,12 @@
-package edu.itc.salesreport.ui;
+package edu.itc.salesreport.ui.mvc;
 
 import edu.itc.salesreport.TestData;
 import edu.itc.salesreport.engine.DefaultSalesAggregator;
 import edu.itc.salesreport.ingest.CsvMonthReader;
 import edu.itc.salesreport.ingest.CsvTransactionParser;
+import edu.itc.salesreport.ui.ErrorDisplay;
+import edu.itc.salesreport.ui.SalesEvent;
+import edu.itc.salesreport.ui.SalesModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

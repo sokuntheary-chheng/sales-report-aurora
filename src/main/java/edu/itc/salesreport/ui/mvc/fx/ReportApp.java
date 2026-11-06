@@ -1,10 +1,10 @@
-package edu.itc.salesreport.ui.fx;
+package edu.itc.salesreport.ui.mvc.fx;
 
 import edu.itc.salesreport.engine.DefaultSalesAggregator;
 import edu.itc.salesreport.ingest.CsvMonthReader;
 import edu.itc.salesreport.ingest.CsvTransactionParser;
-import edu.itc.salesreport.ui.ReportController;
 import edu.itc.salesreport.ui.SalesModel;
+import edu.itc.salesreport.ui.mvc.ReportController;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;

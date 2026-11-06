@@ -1,12 +1,12 @@
-package edu.itc.salesreport.ui.fx;
+package edu.itc.salesreport.ui.mvc.fx;
 
 import edu.itc.salesreport.model.SaleTransaction;
 import edu.itc.salesreport.ui.ErrorDisplay;
-import edu.itc.salesreport.ui.ReportController;
 import edu.itc.salesreport.ui.ReportText;
 import edu.itc.salesreport.ui.SalesEvent;
 import edu.itc.salesreport.ui.SalesModel;
 import edu.itc.salesreport.ui.SalesModelListener;
+import edu.itc.salesreport.ui.mvc.ReportController;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.geometry.Insets;
 import javafx.scene.chart.BarChart;

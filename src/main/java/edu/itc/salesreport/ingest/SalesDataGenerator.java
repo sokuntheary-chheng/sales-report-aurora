@@ -152,14 +152,81 @@ public final class SalesDataGenerator {
     /**
      * Writes the sample months below {@code dataDir}.
      *
-     * @param args the first argument is the data directory, default {@code data}
+     * <p>Lab-03 measurement mode: four arguments
+     * {@code <yyyy-MM> <rows-per-branch-per-day> <seed> <dataDir>} write one
+     * random month for the load benchmark, without the calibration of the
+     * published months (the benchmark only needs a lot of rows). With one
+     * argument or none the calibrated Lab-02 months are written, unchanged.
+     *
+     * @param args the data directory, or month, rows, seed and directory
      */
     public static void main(String[] args) throws IOException {
+        if (args.length >= 4 && args[0].matches("\\d{4}-\\d{2}")) {
+            writeMeasurementMonth(Path.of(args[3]),
+                    YearMonth.parse(args[0]),
+                    Integer.parseInt(args[1]),
+                    Long.parseLong(args[2]));
+            return;
+        }
         Path dataDir = Path.of(args.length > 0 ? args[0] : "data");
         writeMonth(dataDir, YearMonth.of(2026, 9), SEPTEMBER, SEPTEMBER_RECEIPTS);
         writeMonth(dataDir, YearMonth.of(2026, 8),
                 scaleTargets(SEPTEMBER, 31.0 / 30.0),
                 scaleReceipts(SEPTEMBER_RECEIPTS, 31.0 / 30.0));
+    }
+
+    /**
+     * Writes one random month for the Lab-03 load benchmark: every branch
+     * file of every day holds exactly {@code rowsPerBranchPerDay} parser-
+     * valid rows in three-row receipts, numbered across the month.
+     */
+    private static void writeMeasurementMonth(Path dataDir, YearMonth month,
+            int rowsPerBranchPerDay, long seed) throws IOException {
+        int days = month.lengthOfMonth();
+        Path dir = Files.createDirectories(dataDir.resolve(month.toString()));
+        long totalRows = (long) days * BRANCHES.size() * rowsPerBranchPerDay;
+        System.out.printf("%s: %d files, %d rows (seed %d, %d per branch and day)%n",
+                month, (long) days * BRANCHES.size(), totalRows,
+                seed, rowsPerBranchPerDay);
+        long written = 0;
+        for (int b = 0; b < BRANCHES.size(); b++) {
+            String branch = BRANCHES.get(b);
+            var random = new Random(seed + 1000L * b + month.getMonthValue());
+            int receipt = 0;
+            for (int day = 1; day <= days; day++) {
+                var out = new StringBuilder();
+                out.append(CsvTransactionParser.HEADER)
+                        .append(System.lineSeparator());
+                for (int i = 0; i < rowsPerBranchPerDay; i++) {
+                    if (i % 3 == 0) {
+                        receipt++;
+                    }
+                    Line line = draw(CATEGORIES.get(
+                            random.nextInt(CATEGORIES.size())), random);
+                    out.append(String.format(
+                            "%s,%s,%s-%06d,%s,%s,%s,%d,%s,%s,%s%n",
+                            branch,
+                            month.atDay(day),
+                            branch,
+                            receipt,
+                            line.product.sku(),
+                            line.product.name(),
+                            line.product.category(),
+                            line.quantity,
+                            line.product.price()
+                                    .setScale(2, RoundingMode.HALF_UP),
+                            line.discount.setScale(2, RoundingMode.HALF_UP),
+                            PAYMENTS.get(random.nextInt(PAYMENTS.size()))));
+                }
+                Files.writeString(
+                        dir.resolve(branch + "-" + month.atDay(day) + ".csv"),
+                        out.toString(), StandardCharsets.UTF_8);
+                written += rowsPerBranchPerDay;
+            }
+            System.out.printf("  %s: %d rows, %d receipts%n", branch,
+                    (long) days * rowsPerBranchPerDay, receipt);
+        }
+        System.out.println("  total rows: " + written);
     }
 
     /** Scales a table of targets to another month length. */

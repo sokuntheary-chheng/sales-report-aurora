@@ -13,10 +13,11 @@ import java.nio.file.Path;
 import java.time.Clock;
 
 /**
- * The same screen as {@link ReportApp}, but built as Model View Presenter.
+ * The same screen as {@link edu.itc.salesreport.ui.mvc.fx.ReportApp}, but
+ * built as Model View Presenter.
  *
  * <p>Run it with {@code mvn javafx:run
- * -Djavafx.mainClass=edu.itc.salesreport.ui.fx.ReportMvpApp}.
+ * -Dapp.main=edu.itc.salesreport.ui.fx.ReportMvpApp}.
  */
 public final class ReportMvpApp extends Application {
 
